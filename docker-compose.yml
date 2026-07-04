@@ -36,11 +36,11 @@ services:
     ports:
       - "80:80"
       - "443:443"
-      - "2017:2017"   # v2rayA web UI
+      - "2017:2017"   # v2rayA web UI (direct access; nginx also proxies it over 443)
       - "9050:9050"   # Tor SOCKS5 (only used if TOR_COUNTRY is set)
-      # The X-UI panel port is randomly generated on first install (30000-60000).
-      # After first boot, check it (see README) and add it here, e.g.:
-      # - "34567:34567"
+      # The X-UI panel itself is NOT published directly - nginx reverse-proxies
+      # it over the 443 port above at the random path printed in the install
+      # log (see README's "Finding your panel URL and credentials").
     restart: unless-stopped
 
 volumes:

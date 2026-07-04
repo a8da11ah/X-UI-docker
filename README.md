@@ -38,23 +38,35 @@ Watch the first-boot install (it runs once, takes several minutes — full
 docker exec -it x-ui-pro journalctl -u x-ui-pro-install.service -f
 ```
 
-## Finding your panel port and credentials
+## Finding your panel URL and credentials
 
-`x-ui-pro.sh` generates a random X-UI panel port (30000-60000) and admin
-credentials on first install and prints them to the installer log above.
-Once you know the port, add it to the `ports:` list in `docker-compose.yml`
-(there's a commented example) and run `docker compose up -d` again — the
-`.installed` marker means the installer won't re-run, only the port mapping
-changes.
-
-To inspect or reset panel credentials from inside the container:
+`x-ui-pro.sh` generates a random internal panel port and admin credentials
+on first install and prints them to the installer log (see command above).
+You don't need to publish that random port yourself — nginx reverse-proxies
+the panel, v2rayA, and the subscription URL through port 443 (already
+published in `docker-compose.yml`) at the path shown in the log, e.g.:
 
 ```
-docker exec -it x-ui-pro x-ui settings
+Admin Panel [SSL]:
+XrayUI: https://<your-domain>/<random-path>/
+V2rayA: https://<your-domain>/<random-path>/
+Username: ...
+Password: ...
 ```
 
-(exact subcommand depends on which `-panel` fork you selected — see the
-upstream project's docs).
+Save that output — it's only printed once, at install time. Since it also
+lands in `journalctl`/your terminal scrollback, treat those credentials as
+already exposed and rotate the panel password after you've confirmed
+everything works.
+
+The `x-ui` CLI (`docker exec -it x-ui-pro x-ui settings`) may report
+`Please install the panel first` even though the panel is running — the
+installer's service/path layout doesn't line up with what that CLI's status
+check expects for every `-panel` fork. Not blocking; use the printed
+URL/credentials above instead. If you want to chase it down, check
+`docker exec -it x-ui-pro systemctl status x-ui` and
+`docker exec -it x-ui-pro systemctl list-units --type=service` to see what
+the panel's actual service is named inside the container.
 
 ## Persistence
 
