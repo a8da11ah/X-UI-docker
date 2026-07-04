@@ -1,0 +1,17 @@
+[Unit]
+Description=First-boot installer for x-ui-pro
+After=network-online.target
+Wants=network-online.target
+ConditionPathExists=!/etc/x-ui-pro/.installed
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+EnvironmentFile=/etc/x-ui-pro.env
+ExecStart=/usr/local/bin/install-wrapper.sh
+StandardOutput=journal+console
+StandardError=journal+console
+TimeoutStartSec=1800
+
+[Install]
+WantedBy=multi-user.target

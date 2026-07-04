@@ -1,0 +1,46 @@
+services:
+  x-ui-pro:
+    build: .
+    container_name: x-ui-pro
+    hostname: x-ui-pro
+    # systemd needs real control over cgroups/namespaces to manage the
+    # nginx/x-ui/v2raya/warp-plus/tor/cron services the installer creates.
+    privileged: true
+    cgroup: host
+    tmpfs:
+      - /run
+      - /run/lock
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+      # systemd (PID 1) does NOT forward its own process environment to the
+      # units it spawns, so env_file below is not visible to the installer
+      # service - it reads config from this bind-mounted file instead via
+      # EnvironmentFile= in x-ui-pro-install.service.
+      - ./.env:/etc/x-ui-pro.env:ro
+      - x-ui-etc:/etc/x-ui
+      - x-ui-pro-state:/etc/x-ui-pro
+      - nginx-etc:/etc/nginx
+      - letsencrypt:/etc/letsencrypt
+      - backups:/var/backups
+      - tor-etc:/etc/tor
+      - cron-spool:/var/spool/cron
+    env_file:
+      - .env
+    ports:
+      - "80:80"
+      - "443:443"
+      - "2017:2017"   # v2rayA web UI
+      - "9050:9050"   # Tor SOCKS5 (only used if TOR_COUNTRY is set)
+      # The X-UI panel port is randomly generated on first install (30000-60000).
+      # After first boot, check it (see README) and add it here, e.g.:
+      # - "34567:34567"
+    restart: unless-stopped
+
+volumes:
+  x-ui-etc:
+  x-ui-pro-state:
+  nginx-etc:
+  letsencrypt:
+  backups:
+  tor-etc:
+  cron-spool:
