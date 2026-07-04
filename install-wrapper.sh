@@ -32,6 +32,15 @@ ARGS=(-panel "$PANEL" -xuiver "$XUI_VER" -cdn "$CDN" -secure "$SECURE" -country 
 [ -n "${WARP_COUNTRY:-}" ] && ARGS+=(-WarpCfonCountry "$WARP_COUNTRY")
 [ -n "${WARP_LIC_KEY:-}" ] && ARGS+=(-WarpLicKey "$WARP_LIC_KEY")
 
+echo "[x-ui-pro] waiting for DNS resolution..."
+for i in $(seq 1 30); do
+    if getent hosts raw.githubusercontent.com >/dev/null 2>&1; then
+        break
+    fi
+    [ "$i" -eq 30 ] && { echo "[x-ui-pro] DNS still not resolving after 60s, giving up this attempt" >&2; exit 4; }
+    sleep 2
+done
+
 echo "[x-ui-pro] fetching installer..."
 apt-get update -qq
 wget -qO /tmp/x-ui-pro.sh "https://raw.githubusercontent.com/GFW4Fun/x-ui-pro/master/x-ui-pro.sh"

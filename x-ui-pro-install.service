@@ -3,6 +3,8 @@ Description=First-boot installer for x-ui-pro
 After=network-online.target
 Wants=network-online.target
 ConditionPathExists=!/etc/x-ui-pro/.installed
+StartLimitIntervalSec=1200
+StartLimitBurst=10
 
 [Service]
 Type=oneshot
@@ -12,6 +14,8 @@ ExecStart=/usr/local/bin/install-wrapper.sh
 StandardOutput=journal+console
 StandardError=journal+console
 TimeoutStartSec=1800
+Restart=on-failure
+RestartSec=15
 
 [Install]
 WantedBy=multi-user.target

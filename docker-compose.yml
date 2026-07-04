@@ -7,6 +7,13 @@ services:
     # nginx/x-ui/v2raya/warp-plus/tor/cron services the installer creates.
     privileged: true
     cgroup: host
+    # Don't rely on Docker's auto-detected host DNS: if the host uses
+    # systemd-resolved, /etc/resolv.conf there often points at 127.0.0.53,
+    # a loopback address that's unreachable from inside the container's own
+    # network namespace and causes "Temporary failure resolving" errors.
+    dns:
+      - 1.1.1.1
+      - 8.8.8.8
     tmpfs:
       - /run
       - /run/lock
